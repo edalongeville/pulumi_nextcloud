@@ -1,0 +1,3 @@
+name: nextcloud
+runtime: python
+description: A minimal AWS Python Pulumi program
