@@ -1,29 +1,27 @@
 import pulumi
 import pulumi_aws as aws
-import random
-import string
 
 size = "t2.micro"
 # Before running this script, you MUST manually create a keypair
 keyName = "AWS_EC2"  # PROVIDE YOUR OWN KEY PAIR NAME
 availabilityZone = "eu-west-3b"  # PROVIDE YOUR OWN AZ
-mysqlPassword = "87jnwrbKF!DL8cDU"  # Generate YOUR OWN password: https://passwordsgenerator.net/
+# Todo: Allow DB password to use special chars
+mysqlRootPassword = "testeur56"  # Generate YOUR OWN password: https://passwordsgenerator.net/
+mysqlNextcloudPassword = "testeur56"  # Generate YOUR OWN password: https://passwordsgenerator.net/
 
 #region S3
 
-# Create a KMS Key for S3 server-side encryption
-key = aws.kms.Key('nextcloud-bucket-key')
 
 # Create an AWS resource (S3 Bucket)
-bucket = aws.s3.Bucket('nextcloud-bucket',
-                       server_side_encryption_configuration={
-                           'rule': {
-                               'apply_server_side_encryption_by_default': {
-                                   'sse_algorithm': 'aws:kms',
-                                   'kms_master_key_id': key.id
-                               }
-                           }
-                       })
+# Todo: Make S3 SSE work with Nextcloud
+bucket = aws.s3.Bucket('nextcloud-bucket')
+# Block all public access https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html
+aws.s3.BucketPublicAccessBlock('nextcloud-bucket-public-block',
+                               bucket=bucket.id,
+                               block_public_acls=True,
+                               ignore_public_acls=True,
+                               block_public_policy=True,
+                               restrict_public_buckets=True)
 
 # Export the name of the bucket
 pulumi.export('bucket_name', bucket.id)
@@ -49,7 +47,7 @@ jsonPolicy = pulumi.Output.concat("{\n\
             \"Action\": \"s3:*\",\n\
             \"Resource\": [\n\
                 \"", bucket.arn, "\",\n\
-                \"", bucket.arn,"/*\"\n\
+                \"", bucket.arn, "/*\"\n\
             ]\n\
         }\n\
     ]\n\
@@ -62,28 +60,23 @@ policy = aws.iam.Policy('nextcloud-policy', policy=jsonPolicy)
 user = aws.iam.User('nextcloud-S3-user', name='nextcloud-s3-user')
 userAccessKey = aws.iam.AccessKey('user-access-key', user=user.id)
 
-pulumi.export('AccessKey_id', userAccessKey.id)
-pulumi.export('AccessKey_secret', userAccessKey.secret)
-
-
 # Attach the policy to the user
 aws.iam.PolicyAttachment('nextcloud-policy-attachment', policy_arn=policy.arn, users=[user.id])
 #endregion
 
 #region EC2
 
-# Fill the User Data script
 with open('userData.sh', 'r') as file:
     userScript = file.read()
 
-userScript = userScript.replace('<BUCKET_NAME>', str(bucket.id))
-userScript = userScript.replace('<USER_KEY>', str(userAccessKey.id))
-userScript = userScript.replace('<USER_SECRET>', str(userAccessKey.secret))
-# Generate a secure password for MYSQL DB
-userScript = userScript.replace('<MYSQL_PASSWORD>',
-                                ''.join(random.SystemRandom().choice(
-                                    string.ascii_letters +
-                                    string.digits) for _ in range(20)))
+userScript = userScript.replace('<MYSQL_NEXTCLOUD_PASSWORD>', mysqlNextcloudPassword)
+userScript = userScript.replace('<MYSQL_ROOT_PASSWORD>', mysqlRootPassword)
+
+userScript_final = pulumi.Output.all(bucket.id, userAccessKey.id, userAccessKey.secret).apply(
+    lambda l:
+        userScript.replace('<BUCKET_NAME>', l[0]).replace('<USER_KEY>', l[1]).replace('<USER_SECRET>', l[2])
+)
+
 
 # Retrieve the most recent Ubuntu Server 18.04 LTS (HVM), SSD Volume Type
 ami = aws.get_ami(most_recent=True,
@@ -92,9 +85,10 @@ ami = aws.get_ami(most_recent=True,
 
 # Create a Security Group allowing ssh access
 group = aws.ec2.SecurityGroup('nextcloud-secgrp',
-                              description='Enable SSH and HTTP access',
+                              description='Enable SSH and HTTP/S access',
                               ingress=[
                                   {'protocol': 'tcp', 'from_port': 22, 'to_port': 22, 'cidr_blocks': ['0.0.0.0/0']},
+                                  {'protocol': 'tcp', 'from_port': 443, 'to_port': 443, 'cidr_blocks': ['0.0.0.0/0']},
                                   {'protocol': 'tcp', 'from_port': 80, 'to_port': 80, 'cidr_blocks': ['0.0.0.0/0']}
                               ],
                               egress=[
@@ -109,12 +103,9 @@ server = aws.ec2.Instance('webserver-www',
                           key_name=keyName,
                           associate_public_ip_address=True,
                           availability_zone=availabilityZone,
-                          user_data=userScript)
+                          user_data=userScript_final)
 elasticIp = aws.ec2.Eip('elastic-ip', instance=server.id)
 
 # Exporting values to pulumi
-pulumi.export('publicIp', server.public_ip)
-pulumi.export('publicHostName', server.public_dns)
-pulumi.export('nextcloudUrl', pulumi.Output.concat("http://", server.public_ip, "/nextcloud"))
 pulumi.export('elasticIP', elasticIp.public_ip)
 #endregion

@@ -1,12 +1,17 @@
 #!/bin/bash
 apt update
 apt install apache2 mysql-server -y
-apt install php zip libapache2-mod-php php-gd php-json php-mysql php-curl php-mbstring php-intl php-imagick php-xml php-zip php-mysql -y
+apt install php zip libapache2-mod-php php-gd php-json php-mysql php-curl php-mbstring php-intl php-imagick php-xml php-zip php-mysql software-properties-common -y
+add-apt-repository universe -y
+add-apt-repository ppa:certbot/certbot -y
+apt install certbot python-certbot-apache -y
+# Stop Apache during install
+systemctl stop apache2
 
 ## MYSQL
-#mysql_secure_installation
+# Todo: mysql_secure_installation
 mysql --user="root" --execute="CREATE DATABASE nextcloud;
-                                CREATE USER 'nextcloud'@'localhost' IDENTIFIED BY '<MYSQL_PASSWORD>';
+                                CREATE USER 'nextcloud'@'localhost' IDENTIFIED BY '<MYSQL_NEXTCLOUD_PASSWORD>';
                                 GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'localhost';
                                 FLUSH PRIVILEGES;"
 
@@ -17,8 +22,9 @@ mv nextcloud /var/www/html/
 chown -R www-data:www-data /var/www/html/nextcloud
 
 ## Apache
-APACHE_CONFIG=$(cat <<'EOF'
-Alias /nextcloud '/var/www/html/nextcloud/'
+APACHE_CONFIG=$(
+  cat <<'EOF'
+Alias / '/var/www/html/nextcloud/'
 <Directory /var/www/html/nextcloud/>
     Options +FollowSymlinks
     AllowOverride All
@@ -30,17 +36,18 @@ Alias /nextcloud '/var/www/html/nextcloud/'
     SetEnv HTTP_HOME /var/www/html/nextcloud
 </Directory>
 EOF
-);
-echo "$APACHE_CONFIG" > /etc/apache2/sites-available/nextcloud.conf
+)
+echo "$APACHE_CONFIG" >/etc/apache2/sites-available/nextcloud.conf
 
 # Apache conf
 a2ensite nextcloud
-a2enmod rewrite headers env dir mime
+a2enmod rewrite headers env dir mime socache_shmcb ssl
 sed -i '/^memory_limit =/s/=.*/= 512M/' /etc/php/7.2/apache2/php.ini
-systemctl restart apache2
+# systemctl restart apache2
 
 # Connect to S3 (https://autoize.com/s3-compatible-storage-for-nextcloud/)
-NEXTCLOUDS3CONFIG =$(cat <<'EOF'
+NEXTCLOUDS3CONFIG=$(
+  cat <<'EOF'
 <?php
 $CONFIG = [
   'objectstore' => array(
@@ -57,7 +64,10 @@ $CONFIG = [
 ),
 ];
 EOF
-);
+)
 
-echo $NEXTCLOUDS3CONFIG > /var/www/html/nextcloud/config/storage.config.php
+echo "$NEXTCLOUDS3CONFIG" >/var/www/html/nextcloud/config/storage.config.php
 chown -R www-data:www-data /var/www/html/nextcloud/config/storage.config.php
+
+# Start Apache once conf done
+systemctl start apache2
