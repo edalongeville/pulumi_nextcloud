@@ -1,13 +1,16 @@
 import pulumi
 import pulumi_aws as aws
+import configparser
 
-size = "t2.micro"
-# Before running this script, you MUST manually create a keypair
-keyName = "AWS_EC2"  # PROVIDE YOUR OWN KEY PAIR NAME
-availabilityZone = "eu-west-3b"  # PROVIDE YOUR OWN AZ
 # Todo: Allow DB password to use special chars
-mysqlRootPassword = "testeur56"  # Generate YOUR OWN password: https://passwordsgenerator.net/
-mysqlNextcloudPassword = "testeur56"  # Generate YOUR OWN password: https://passwordsgenerator.net/
+config = configparser.ConfigParser()
+config.read('pulumi_nextcloud.config')
+size = config['NEXTCLOUD']['size']
+keyName = config['NEXTCLOUD']['keyName']
+availabilityZone = config['NEXTCLOUD']['availabilityZone']
+mysqlRootPassword = config['NEXTCLOUD']['mysqlRootPassword']
+mysqlNextcloudPassword = config['NEXTCLOUD']['mysqlNextcloudPassword']
+
 
 #region S3
 

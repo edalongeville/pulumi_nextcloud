@@ -6,6 +6,7 @@ Simply deploy Nextcloud to AWS using Pulumi
 ## Requirements
 
 ## Pre install tasks
+Configure the project in pulumi_nextcloud.config. **Keep a backup of this configuration in a secured place.**
 
 ##Post install
 ### Configure your instance

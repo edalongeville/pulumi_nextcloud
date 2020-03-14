@@ -1,3 +1,3 @@
 name: nextcloud
 runtime: python
-description: A minimal AWS Python Pulumi program
+description: Deploys a nextcloud instance to AWS
