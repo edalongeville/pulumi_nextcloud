@@ -34,23 +34,23 @@ jsonPolicy = pulumi.Output.concat("{\n\
 print(jsonPolicy)
 
 policy = iam.Policy(
-    'nextcloud-policy', 
+    f"nextcloud-policy-{env}", 
     policy=jsonPolicy
     )
 
 # Create a user
 user = iam.User(
-    'nextcloud-S3-user', 
+    f"nextcloud-S3-user-{env}", 
     name=f"nextcloud-s3-user-{env}"
     )
 
 userAccessKey = iam.AccessKey(
-    'user-access-key', 
+    f"nextcloud-user-access-key-{env}", 
     user=user.id
     )
 
 # Attach the policy to the user
 iam.PolicyAttachment(
-    'nextcloud-policy-attachment', 
+    f"nextcloud-policy-attachment-{env}", 
     policy_arn=policy.arn, 
     users=[user.id])
