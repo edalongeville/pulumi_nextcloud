@@ -2,7 +2,7 @@
 Provisions the EC2 instance running Nextcloud
 """
 import pulumi
-from pulumi_aws import get_ami, ec2
+from pulumi_aws import get_ami, ec2, ebs
 
 from storage import bucket
 from access import userAccessKey
@@ -14,6 +14,12 @@ size = config.require("size")
 keyPairName = config.require("keyPairName")
 availabilityZone = config.require("availabilityZone")
 
+# We first need to know our Instance IP (required in userData)
+elastic_ip = ec2.Eip(
+    f"nextcloud-elastic-ip-{env}",
+    # instance=instance.id
+)
+
 # We first need to generate the userData script by filling the fields in userData.sh
 with open('userData.sh', 'r') as file:
     userScript = file.read()
@@ -22,7 +28,8 @@ userScript_final = pulumi.Output.all(bucket.id,
                                      userAccessKey.id,
                                      userAccessKey.secret,
                                      mysqlNextcloudPassword.result,
-                                     mysqlRootPassword.result
+                                     mysqlRootPassword.result,
+                                     elastic_ip.public_ip
                                      ).apply(
     lambda l:
     userScript.replace('<BUCKET_NAME>', l[0])
@@ -30,6 +37,7 @@ userScript_final = pulumi.Output.all(bucket.id,
     .replace('<USER_SECRET>', l[2])
     .replace('<MYSQL_NEXTCLOUD_PASSWORD>', l[3])
     .replace('<MYSQL_ROOT_PASSWORD>', l[4])
+    .replace('<ELASTIC_IP>', l[5])
 )
 
 
@@ -60,7 +68,7 @@ group = ec2.SecurityGroup(
 )
 
 # Create an EC2 (using the ami previously retrieved)
-server = ec2.Instance(
+instance = ec2.Instance(
     f"nextcloud-webserver-www-{env}",
     instance_type=size,
     # reference security group from above
@@ -68,16 +76,43 @@ server = ec2.Instance(
     ami=ami.id,
     key_name=keyPairName,
     associate_public_ip_address=True,
+    # public_ip=elasticIp,
     availability_zone=availabilityZone,
     user_data=userScript_final,
     tags={'Name': f"nextcloud-{env}"}
 )
 
-elasticIp = ec2.Eip(
-    f"nextcloud-elastic-ip-{env}",
-    instance=server.id
+# Associate our Elastic IP to the instance
+elastic_ip_association = ec2.EipAssociation(
+    f"nextcloud-elastic-ip-association{env}",
+    opts=None,
+    allocation_id=None,
+    allow_reassociation=None,
+    instance_id=instance.id,
+    network_interface_id=None,
+    private_ip_address=None,
+    public_ip=elastic_ip.public_ip,
+    __props__=None)
+
+
+# Create a volume to store the DB
+storage_volume = ebs.Volume(
+    resource_name=f"nextcloud-ebs-{env}",
+    size=1,
+    availability_zone=availabilityZone,
+    tags={'Name': f"nextcloud-storage-{env}"}
+)
+
+# Attach the volume to the EC2
+ec2.VolumeAttachment(
+    resource_name=f"nextcloud-ec2-volume-attachment-{env}",
+    device_name="/dev/sdh",
+    instance_id=instance.id,
+    skip_destroy=True,
+    volume_id=storage_volume.id,
 )
 
 # Exporting values to pulumi
-pulumi.export('elasticIP', elasticIp.public_ip)
-# endregion
+pulumi.export('elasticIP', elastic_ip.public_ip)
+pulumi.export('database_name', "nextcloud")
+pulumi.export('database_user', "nextcloud")
