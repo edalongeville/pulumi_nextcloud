@@ -77,7 +77,6 @@ instance = ec2.Instance(
     ami=ami.id,
     key_name=keyPairName,
     associate_public_ip_address=True,
-    # public_ip=elasticIp,
     availability_zone=availabilityZone,
     user_data=userScript_final,
     tags={'Name': f"nextcloud-{env}"}
