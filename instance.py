@@ -38,6 +38,7 @@ userScript_final = pulumi.Output.all(bucket.id,
     .replace('<MYSQL_NEXTCLOUD_PASSWORD>', l[3])
     .replace('<MYSQL_ROOT_PASSWORD>', l[4])
     .replace('<ELASTIC_IP>', l[5])
+    .replace('<AWS_REGION>', pulumi.Config("aws").require("region"))
 )
 
 
