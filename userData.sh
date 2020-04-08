@@ -112,7 +112,7 @@ $CONFIG = [
             'autocreate' => false,
             'use_ssl' => true,
             'use_path_style'=>false,   
-            'region' => 'eu-west-3',   
+            'region' => '<AWS_REGION>',   
     ),
 ),
 ];
