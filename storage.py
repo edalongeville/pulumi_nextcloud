@@ -18,5 +18,5 @@ s3.BucketPublicAccessBlock(
     restrict_public_buckets=True)
 
 # Export the name of the bucket
-pulumi.export('bucket_name', bucket.id)
-pulumi.export('bucket_arn', bucket.arn)
+#pulumi.export('bucket_name', bucket.id)
+#pulumi.export('bucket_arn', bucket.arn)
