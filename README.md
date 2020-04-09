@@ -75,3 +75,10 @@ And from your local machine (NOT ON THE SERVER):
 
 ```scp -i <YOUR_KEYPAIR_FILE_NAME>.pem ubuntu@<YOUR_ELASTIC_IP>:/home/ubuntu/letsencrypt.zip .```
 
+## Troubleshooting
+### My Nextcloud DB reached the max size!
+The nextcloud Data and DB are stored on a 1GB EBS Volume. If your database reached the maximum size:
+- In Pulumi.***STACK***.yaml, increase `nextcloud:volume_size_G`
+- Update the stack with `pulumi up`
+- ssh to your instance, and type as root: `xfs_growfs -d /mnt/ebs`
+- You can verify the success with `df -h`

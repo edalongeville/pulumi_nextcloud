@@ -13,6 +13,7 @@ config = pulumi.Config("nextcloud")
 size = config.require("size")
 keyPairName = config.require("keyPairName")
 availabilityZone = config.require("availabilityZone")
+volume_size_G = config.require("volume_size_G")
 
 # We first need to know our Instance IP (required in userData)
 elastic_ip = ec2.Eip(
@@ -98,7 +99,7 @@ elastic_ip_association = ec2.EipAssociation(
 # Create a volume to store the DB
 storage_volume = ebs.Volume(
     resource_name=f"nextcloud-ebs-{env}",
-    size=1,
+    size=volume_size_G,
     availability_zone=availabilityZone,
     tags={'Name': f"nextcloud-storage-{env}"}
 )
