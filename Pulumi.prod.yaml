@@ -3,3 +3,4 @@ config:
   nextcloud:size: t2.micro
   nextcloud:keyPairName: AWS_EC2
   nextcloud:availabilityZone: eu-west-3b
+  nextcloud:volume_size_G: 1
