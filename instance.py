@@ -101,7 +101,8 @@ storage_volume = ebs.Volume(
     resource_name=f"nextcloud-ebs-{env}",
     size=volume_size_G,
     availability_zone=availabilityZone,
-    tags={'Name': f"nextcloud-storage-{env}"}
+    tags={'Name': f"nextcloud-storage-{env}"},
+    opts=pulumi.ResourceOptions(protect=True)
 )
 
 # Attach the volume to the EC2
