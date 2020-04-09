@@ -2,27 +2,27 @@
 Simply deploy Nextcloud to AWS using Pulumi
 
 ## What this does
-This projects deploys a fully operation Nextcloud instance to AWS, using pulumi.
+This projects deploys a fully operational [Nextcloud](https://nextcloud.com/) instance to [AWS](https://aws.amazon.com/), using [Pulumi](https://www.pulumi.com/).
 
 ## Requirements
 - An AWS account (with registered credit card)
 - An AWS user with admin permissions (seriously, don't use the root account... and enable MFA!)
 - A pulumi account
-- If you're new to Pulumi, follow the instructions at https://www.pulumi.com/docs/get-started/aws/
+- If you're new to Pulumi, follow the [getting started instructions](https://www.pulumi.com/docs/get-started/aws/).
 
 ## Pre deployment tasks
 ### Create an EC2 keypair:
-https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair
+Follow this [AWS Documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair).
 
 
 ## Deploy nextcloud
 - Clone this repo
-- In Pulumi.nextcloud-prod.yaml, fill the region closest to you
-- In Pulumi.nextcloud-prod.yaml, chose your instance size (t2.micro is included in AWS free tier)
-- In Pulumi.nextcloud-prod.yaml, put your keypair name (from pre deployment tasks)
-- # TODO: Create pulumi stack
-- # TODO: Create/activate the venv, install requirements
-- In your terminal, navigate to this repo and type ```pulumi up```
+- In Pulumi.prod.yaml, chose the region/AZ closest to you
+- In Pulumi.prod.yaml, chose your instance size (t2.micro is included in AWS free tier)
+- In Pulumi.prod.yaml, put your keypair name (from pre deployment tasks)
+- `pulumi stack init prod`
+- `python3 -m venv venv; source venv/bin/activate; pip3 install -r requirements.txt`
+- `pulumi up`
 
 ## Post deployment tasks
 Please note the stack outputs displayed in your terminal at the end of the install. They will be needed for the next steps.
@@ -35,14 +35,14 @@ Go to `http://<YOUR_ELASTIC_IP>`.
 
 Fill the DB information:
 - user: "nextcloud"
-- password: see <mysql_nextcloud_passwd> from the stack outputs
+- password: see `mysql_nextcloud_passwd` from the stack outputs
 - name: "nextcloud"
 - host: "localhost"
 
 Chose wether you want the recommended apps.
 Press "Finish setup"
 
-You may create accounts for your users, and start using nextcloud:
+You may now create accounts for your users, and start using nextcloud:
 https://docs.nextcloud.com/
 
 ## Optional steps
