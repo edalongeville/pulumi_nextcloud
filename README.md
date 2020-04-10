@@ -69,11 +69,7 @@ Provide your email, your domain (cloud.mydomain.fr) and chose Redirect. Certbot 
 
 Backup the certs:
 
-```zip -r /home/ubuntu/letsencrypt.zip /etc/letsencrypt```
-
-And from your local machine (NOT ON THE SERVER):
-
-```scp -i <YOUR_KEYPAIR_FILE_NAME>.pem ubuntu@<YOUR_ELASTIC_IP>:/home/ubuntu/letsencrypt.zip .```
+```zip -r /mnt/ebs/letsencrypt.zip /etc/letsencrypt```
 
 ## Troubleshooting
 ### My Nextcloud DB reached the max size!
