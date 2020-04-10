@@ -14,13 +14,12 @@ This projects deploys a fully operational [Nextcloud](https://nextcloud.com/) in
 ### Create an EC2 keypair:
 Follow this [AWS Documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair).
 
-
 ## Deploy nextcloud
 - Clone this repo
 - In Pulumi.prod.yaml, chose the region/AZ closest to you
 - In Pulumi.prod.yaml, chose your instance size (t2.micro is included in AWS free tier)
 - In Pulumi.prod.yaml, put your keypair name (from pre deployment tasks)
-- `pulumi stack init prod`
+- `pulumi stack` => Create new stack =>name it "`prod`"
 - `python3 -m venv venv; source venv/bin/activate; pip3 install -r requirements.txt`
 - `pulumi up`
 
