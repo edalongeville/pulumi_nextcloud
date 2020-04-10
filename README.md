@@ -22,6 +22,7 @@ Follow this [AWS Documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGu
 - `pulumi stack` => Create new stack =>name it "`prod`"
 - `python3 -m venv venv; source venv/bin/activate; pip3 install -r requirements.txt`
 - `pulumi up`
+- It should take about 10 minutes for your instance to be ready. Be patient!
 
 ## Post deployment tasks
 Please note the stack outputs displayed in your terminal at the end of the install. They will be needed for the next steps.
@@ -76,7 +77,7 @@ And from your local machine (NOT ON THE SERVER):
 
 ## Troubleshooting
 ### My Nextcloud DB reached the max size!
-The nextcloud Data and DB are stored on a 1GB EBS Volume. If your database reached the maximum size:
+The nextcloud Data and DB are stored on an EBS Volume. If your database reached the maximum size:
 - In Pulumi.***STACK***.yaml, increase `nextcloud:volume_size_G`
 - Update the stack with `pulumi up`
 - ssh to your instance, and type as root: `xfs_growfs -d /mnt/ebs`
