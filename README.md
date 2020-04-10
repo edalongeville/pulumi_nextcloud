@@ -86,6 +86,7 @@ The nextcloud Data and DB are stored on a 1GB EBS Volume. If your database reach
 # Destroy the stack
 Because your data is protected, you need to take some actions before destroying the stack:
 - Backup all your data
-- In instance.py, locate the EBS creation (ebs.Volume()) and remove the line `opts=pulumi.ResourceOptions(protect=True)`
 - Empty the S3 bucket (from AWS Management console)
+- Type `pulumi destroy`. You'll get an error message with a resource URN at the end.
+- Type `pulumi state unprotect URN_FROM_PREVIOUS_STEP`
 - Type `pulumi destroy`
