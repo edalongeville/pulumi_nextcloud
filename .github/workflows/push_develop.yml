@@ -1,7 +1,10 @@
 
 name: Preview with Pulumi
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - develop
 
 jobs:
   preview:
