@@ -14,15 +14,15 @@ This projects deploys a fully operational [Nextcloud](https://nextcloud.com/) in
 ### Create an EC2 keypair:
 Follow this [AWS Documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair).
 
-
 ## Deploy nextcloud
 - Clone this repo
 - In Pulumi.prod.yaml, chose the region/AZ closest to you
 - In Pulumi.prod.yaml, chose your instance size (t2.micro is included in AWS free tier)
 - In Pulumi.prod.yaml, put your keypair name (from pre deployment tasks)
-- `pulumi stack init prod`
+- `pulumi stack` => Create new stack =>name it "`prod`"
 - `python3 -m venv venv; source venv/bin/activate; pip3 install -r requirements.txt`
 - `pulumi up`
+- It should take about 10 minutes for your instance to be ready. Be patient!
 
 ## Post deployment tasks
 Please note the stack outputs displayed in your terminal at the end of the install. They will be needed for the next steps.
@@ -69,15 +69,11 @@ Provide your email, your domain (cloud.mydomain.fr) and chose Redirect. Certbot 
 
 Backup the certs:
 
-```zip -r /home/ubuntu/letsencrypt.zip /etc/letsencrypt```
-
-And from your local machine (NOT ON THE SERVER):
-
-```scp -i <YOUR_KEYPAIR_FILE_NAME>.pem ubuntu@<YOUR_ELASTIC_IP>:/home/ubuntu/letsencrypt.zip .```
+`zip -r /mnt/ebs/letsencrypt.zip /etc/letsencrypt`
 
 ## Troubleshooting
 ### My Nextcloud DB reached the max size!
-The nextcloud Data and DB are stored on a 1GB EBS Volume. If your database reached the maximum size:
+The nextcloud Data and DB are stored on an EBS Volume. If your database reached the maximum size:
 - In Pulumi.***STACK***.yaml, increase `nextcloud:volume_size_G`
 - Update the stack with `pulumi up`
 - ssh to your instance, and type as root: `xfs_growfs -d /mnt/ebs`
@@ -86,6 +82,7 @@ The nextcloud Data and DB are stored on a 1GB EBS Volume. If your database reach
 # Destroy the stack
 Because your data is protected, you need to take some actions before destroying the stack:
 - Backup all your data
-- In instance.py, locate the EBS creation (ebs.Volume()) and remove the line `opts=pulumi.ResourceOptions(protect=True)`
 - Empty the S3 bucket (from AWS Management console)
+- Type `pulumi destroy`. You'll get an error message with a resource URN at the end.
+- Type `pulumi state unprotect URN_FROM_PREVIOUS_STEP`
 - Type `pulumi destroy`
