@@ -14,6 +14,7 @@ size = config.require("size")
 keyPairName = config.require("keyPairName")
 availabilityZone = config.require("availabilityZone")
 volume_size_G = config.require("volume_size_G")
+tmp_size_G = config.require("tmp_size_G")
 
 # We first need to know our Instance IP (required in userData)
 elastic_ip = ec2.Eip(
