@@ -94,6 +94,7 @@ if [ "$NEWINSTALL" == true ]; then
   unzip latest*.zip
   mv nextcloud /mnt/ebs/
   chown -R www-data:www-data /mnt/ebs/nextcloud
+  chown www-data:www-data /mnt/temp
 fi
 ln -s /mnt/ebs/nextcloud /var/www/html/nextcloud
 
