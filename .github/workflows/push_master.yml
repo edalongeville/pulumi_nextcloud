@@ -5,7 +5,7 @@ on:
       - master
 jobs:
   up:
-    name: Pulumi Update
+    name: Pulumi Update prod
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
