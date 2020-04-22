@@ -79,6 +79,9 @@ echo "alias /var/lib/mysql/ -> /mnt/ebs/mysql/," >> /etc/apparmor.d/tunables/ali
 systemctl restart apparmor
 # Recreate default dir to trick mysql into starting
 sudo mkdir /var/lib/mysql/mysql -p
+# Mysql perf optimisations
+echo "innodb_buffer_pool_size=768M" >> /etc/mysql/conf.d/mysql.cnf
+echo "innodb_io_capacity=4000" >> /etc/mysql/conf.d/mysql.cnf
 # Start mysql
 systemctl start mysql
 
