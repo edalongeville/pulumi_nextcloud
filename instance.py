@@ -116,7 +116,7 @@ ec2.VolumeAttachment(
 )
 
 # Create a volume to store the tmp folder
-storage_volume = ebs.Volume(
+tmp_volume = ebs.Volume(
     resource_name=f"nextcloud-ebs-tmp-{env}",
     size=tmp_size_G,
     availability_zone=availabilityZone,
@@ -130,7 +130,7 @@ ec2.VolumeAttachment(
     device_name="/dev/sdt",
     instance_id=instance.id,
     skip_destroy=True,
-    volume_id=storage_volume.id,
+    volume_id=tmp_volume.id,
 )
 
 # Exporting values to pulumi
