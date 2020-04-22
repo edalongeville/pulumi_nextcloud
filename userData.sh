@@ -25,16 +25,16 @@ fi
 
 ## Mount EBS tmp
 # Make file system if necessary (only when the volume is new)
-OUTPUT_TMP="$(file -s /dev/xvdt)"
-if [[ $OUTPUT == *"/dev/xvdt: data"* ]]; then
-  mkfs -t xfs /dev/xvdt
+OUTPUT_TMP="$(file -s /dev/xvdi)"
+if [[ $OUTPUT == *"/dev/xvdi: data"* ]]; then
+  mkfs -t xfs /dev/xvdi
 fi
 
 # Create mount point
 mkdir /mnt/temp
 
 # Get UUID and create fstab entry
-REGEX_TMP="\/dev\/xvdt: UUID=\"(.+?)\" "
+REGEX_TMP="\/dev\/xvdi: UUID=\"(.+?)\" "
 OUTPUT="$(blkid)"
 if [[ $OUTPUT_TMP =~ $REGEX_TMP ]]; then
   echo "UUID=${BASH_REMATCH[1]}  /mnt/temp  xfs  defaults,nofail  0  2" >> /etc/fstab

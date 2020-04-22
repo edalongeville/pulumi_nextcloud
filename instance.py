@@ -127,7 +127,7 @@ tmp_volume = ebs.Volume(
 # Attach the volume to the EC2
 ec2.VolumeAttachment(
     resource_name=f"nextcloud-ec2-tmp-volume-attachment-{env}",
-    device_name="/dev/sdt",
+    device_name="/dev/sdi",
     instance_id=instance.id,
     skip_destroy=True,
     volume_id=tmp_volume.id,
