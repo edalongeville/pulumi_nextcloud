@@ -1,13 +1,15 @@
 #!/bin/bash
-
+echo "Script begin" >> /var/log/userData.log
 ## Mount EBS Volume
 # Make file system if necessary (only when the volume is new)
 OUTPUT="$(file -s /dev/xvdh)"
 if [[ $OUTPUT == *"/dev/xvdh: data"* ]]; then
   mkfs -t xfs /dev/xvdh
   NEWINSTALL=true
+  echo "Volume file system created" >> /var/log/userData.log
 else
   NEWINSTALL=false
+  echo "Volume file system found" >> /var/log/userData.log
 fi
 
 # Create mount point
@@ -18,6 +20,7 @@ REGEX="\/dev\/xvdh: UUID=\"(.+?)\" "
 OUTPUT="$(blkid)"
 if [[ $OUTPUT =~ $REGEX ]]; then
   echo "UUID=${BASH_REMATCH[1]}  /mnt/ebs  xfs  defaults,nofail  0  2" >> /etc/fstab
+  echo "EBS UUID found" >> /var/log/userData.log
 else
   echo "Could not find EBS UUID" >> /var/log/userData.log
   exit 1
@@ -28,6 +31,9 @@ fi
 OUTPUT="$(file -s /dev/xvdi)"
 if [[ $OUTPUT == *"/dev/xvdi: data"* ]]; then
   mkfs -t xfs /dev/xvdi
+  echo "Temp file system created" >> /var/log/userData.log
+else
+  echo "Temp file system found" >> /var/log/userData.log
 fi
 
 # Create mount point
@@ -38,8 +44,9 @@ REGEX="\/dev\/xvdi: UUID=\"(.+?)\" "
 OUTPUT="$(blkid)"
 if [[ $OUTPUT =~ $REGEX ]]; then
   echo "UUID=${BASH_REMATCH[1]}  /mnt/temp  xfs  defaults,nofail  0  2" >> /etc/fstab
+  echo "Tmp EBS UUID found" >> /var/log/userData.log
 else
-  echo "Could not find TMP EBS UUID" >> /var/log/userData.log
+  echo "Could not find Tmp EBS UUID" >> /var/log/userData.log
   exit 1
 fi
 
@@ -47,6 +54,7 @@ fi
 mount -a
 
 # Install Mysql
+echo "Installing Mysql..." >> /var/log/userData.log
 apt update
 apt install apache2 mysql-server -y
 
@@ -71,6 +79,7 @@ sudo mkdir /var/lib/mysql/mysql -p
 systemctl start mysql
 
 # Install other required packages
+echo "Installing Packages..." >> /var/log/userData.log
 apt install php zip libapache2-mod-php php-gd php-json php-mysql php-curl php-mbstring php-intl php-imagick php-xml php-zip php-mysql software-properties-common -y
 add-apt-repository universe -y
 add-apt-repository ppa:certbot/certbot -y
@@ -89,6 +98,7 @@ fi
 
 
 ## Nextcloud Install on EBS
+echo "Installing Nextcloud..." >> /var/log/userData.log
 if [ "$NEWINSTALL" == true ]; then
   wget https://download.nextcloud.com/server/releases/latest-18.zip
   unzip latest*.zip
@@ -149,3 +159,4 @@ chown -R www-data:www-data /var/www/html/nextcloud/config/storage.config.php
 
 # Start Apache once conf done
 systemctl start apache2
+echo "Script execution complete..." >> /var/log/userData.log
