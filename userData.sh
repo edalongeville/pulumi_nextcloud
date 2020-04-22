@@ -50,6 +50,10 @@ else
   exit 1
 fi
 
+# Ensure the filesystems are using all volumes space (useful after increasing the size)
+xfs_growfs -d /mnt/ebs
+xfs_growfs -d /mnt/temp
+
 # Mount
 mount -a
 
