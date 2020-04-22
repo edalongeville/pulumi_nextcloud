@@ -114,6 +114,24 @@ ec2.VolumeAttachment(
     volume_id=storage_volume.id,
 )
 
+# Create a volume to store the tmp folder
+storage_volume = ebs.Volume(
+    resource_name=f"nextcloud-ebs-tmp-{env}",
+    size=tmp_size_G,
+    availability_zone=availabilityZone,
+    tags={'Name': f"nextcloud-tmp-{env}"},
+    opts=pulumi.ResourceOptions(protect=True)
+)
+
+# Attach the volume to the EC2
+ec2.VolumeAttachment(
+    resource_name=f"nextcloud-ec2-tmp-volume-attachment-{env}",
+    device_name="/dev/sdt",
+    instance_id=instance.id,
+    skip_destroy=True,
+    volume_id=storage_volume.id,
+)
+
 # Exporting values to pulumi
 pulumi.export('elasticIP', elastic_ip.public_ip)
 pulumi.export('database_name', "nextcloud")

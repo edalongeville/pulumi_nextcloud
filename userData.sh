@@ -9,8 +9,10 @@ if [[ $OUTPUT == *"/dev/xvdh: data"* ]]; then
 else
   NEWINSTALL=false
 fi
+
 # Create mount point
 mkdir /mnt/ebs
+
 # Get UUID and create fstab entry
 REGEX="\/dev\/xvdh: UUID=\"(.+?)\" "
 OUTPUT="$(blkid)"
@@ -18,6 +20,26 @@ if [[ $OUTPUT =~ $REGEX ]]; then
   echo "UUID=${BASH_REMATCH[1]}  /mnt/ebs  xfs  defaults,nofail  0  2" >> /etc/fstab
 else
   echo "Could not find EBS UUID" >> /var/log/userData.log
+  exit 1
+fi
+
+## Mount EBS tmp
+# Make file system if necessary (only when the volume is new)
+OUTPUT_TMP="$(file -s /dev/xvdt)"
+if [[ $OUTPUT == *"/dev/xvdt: data"* ]]; then
+  mkfs -t xfs /dev/xvdt
+fi
+
+# Create mount point
+mkdir /mnt/temp
+
+# Get UUID and create fstab entry
+REGEX_TMP="\/dev\/xvdt: UUID=\"(.+?)\" "
+OUTPUT="$(blkid)"
+if [[ $OUTPUT_TMP =~ $REGEX_TMP ]]; then
+  echo "UUID=${BASH_REMATCH[1]}  /mnt/temp  xfs  defaults,nofail  0  2" >> /etc/fstab
+else
+  echo "Could not find TMP EBS UUID" >> /var/log/userData.log
   exit 1
 fi
 # Mount
@@ -96,6 +118,7 @@ echo "$APACHE_CONFIG" >/etc/apache2/sites-available/nextcloud.conf
 a2ensite nextcloud
 a2enmod rewrite headers env dir mime socache_shmcb ssl
 sed -i '/^memory_limit =/s/=.*/= 512M/' /etc/php/7.2/apache2/php.ini
+echo "sys_temp_dir = \"/mnt/temp\"" >> /etc/php/7.2/apache2/php.ini
 # systemctl restart apache2
 
 # Connect to S3 (https://autoize.com/s3-compatible-storage-for-nextcloud/)
