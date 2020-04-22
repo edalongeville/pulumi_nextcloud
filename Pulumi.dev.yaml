@@ -4,3 +4,4 @@ config:
   nextcloud:keyPairName: AWS_EC2
   nextcloud:availabilityZone: eu-west-3b
   nextcloud:volume_size_G: 2
+  nextcloud:tmp_size_G: 30

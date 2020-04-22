@@ -5,7 +5,7 @@ on:
       - master
 jobs:
   up:
-    name: Pulumi Update
+    name: Pulumi Update prod
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -13,7 +13,7 @@ jobs:
           fetch-depth: 1
       - uses: docker://pulumi/actions
         with:
-          args: up --stack prod
+          args: up --yes --stack prod
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

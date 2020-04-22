@@ -14,6 +14,7 @@ size = config.require("size")
 keyPairName = config.require("keyPairName")
 availabilityZone = config.require("availabilityZone")
 volume_size_G = config.require("volume_size_G")
+tmp_size_G = config.require("tmp_size_G")
 
 # We first need to know our Instance IP (required in userData)
 elastic_ip = ec2.Eip(
@@ -112,6 +113,24 @@ ec2.VolumeAttachment(
     instance_id=instance.id,
     skip_destroy=True,
     volume_id=storage_volume.id,
+)
+
+# Create a volume to store the tmp folder
+tmp_volume = ebs.Volume(
+    resource_name=f"nextcloud-ebs-tmp-{env}",
+    size=tmp_size_G,
+    availability_zone=availabilityZone,
+    tags={'Name': f"nextcloud-tmp-{env}"},
+    opts=pulumi.ResourceOptions(protect=True)
+)
+
+# Attach the volume to the EC2
+ec2.VolumeAttachment(
+    resource_name=f"nextcloud-ec2-tmp-volume-attachment-{env}",
+    device_name="/dev/sdi",
+    instance_id=instance.id,
+    skip_destroy=True,
+    volume_id=tmp_volume.id,
 )
 
 # Exporting values to pulumi
