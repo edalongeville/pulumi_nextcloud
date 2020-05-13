@@ -6,10 +6,12 @@ phases:
       # pulumi
       - curl -fsSL https://get.pulumi.com/ | sh
       - export PATH=$PATH:$HOME/.pulumi/bin
-  build:
+  pre-build:
     commands:
       - python3 -m venv venv
       - . venv/bin/activate
       - pip3 install autopep8 wheel -r requirements.txt
+  build:
+    commands:
       - pulumi stack select dev
       - pulumi up --yes
