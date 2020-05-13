@@ -81,7 +81,8 @@ instance = ec2.Instance(
     associate_public_ip_address=True,
     availability_zone=availabilityZone,
     user_data=userScript_final,
-    tags={'Name': f"nextcloud-{env}"}
+    tags={'Name': f"nextcloud-{env}"},
+    opts=pulumi.ResourceOptions(delete_before_replace=True,)
 )
 
 # Associate our Elastic IP to the instance
@@ -113,6 +114,7 @@ ec2.VolumeAttachment(
     instance_id=instance.id,
     skip_destroy=True,
     volume_id=storage_volume.id,
+    opts=pulumi.ResourceOptions(delete_before_replace=True,)
 )
 
 # Create a volume to store the tmp folder
@@ -131,6 +133,7 @@ ec2.VolumeAttachment(
     instance_id=instance.id,
     skip_destroy=True,
     volume_id=tmp_volume.id,
+    opts=pulumi.ResourceOptions(delete_before_replace=True,)
 )
 
 # Exporting values to pulumi
