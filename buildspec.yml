@@ -8,5 +8,8 @@ phases:
       - export PATH=$PATH:$HOME/.pulumi/bin
   build:
     commands:
+      - python3 -m venv venv
+      - source venv/bin/activate
+      - pip3 install autopep8 wheel -r requirements.txt
       - pulumi stack select dev
       - pulumi preview
