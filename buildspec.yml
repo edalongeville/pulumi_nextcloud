@@ -8,4 +8,7 @@ phases:
       - export PATH=$PATH:$HOME/.pulumi/bin
   build:
     commands:
-      - pulumi_preview.sh
+      - npm install
+      - npm run build
+      - pulumi stack select dev
+      - pulumi preview
