@@ -6,7 +6,7 @@ phases:
       # pulumi
       - curl -fsSL https://get.pulumi.com/ | sh
       - export PATH=$PATH:$HOME/.pulumi/bin
-  pre-build:
+  pre_build:
     commands:
       - python3 -m venv venv
       - . venv/bin/activate
