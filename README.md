@@ -84,5 +84,5 @@ Because your data is protected, you need to take some actions before destroying 
 - Backup all your data
 - Empty the S3 bucket (from AWS Management console)
 - Type `pulumi destroy`. You'll get an error message with a resource URN at the end.
-- Type `pulumi state unprotect URN_FROM_PREVIOUS_STEP`
+- Type `pulumi state unprotect URN_FROM_PREVIOUS_STEP -y`
 - Type `pulumi destroy`
