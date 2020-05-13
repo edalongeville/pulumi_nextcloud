@@ -1,8 +1,12 @@
 #!/bin/bash
 echo "Script begin" >> /var/log/userData.log
+
 ## Mount EBS Volume
 # Make file system if necessary (only when the volume is new)
+echo "file -s /dev/xvdh" >> /var/log/userData.log
 OUTPUT="$(file -s /dev/xvdh)"
+echo $OUTPUT >> /var/log/userData.log
+
 if [[ $OUTPUT == *"/dev/xvdh: data"* ]]; then
   mkfs -t xfs /dev/xvdh
   NEWINSTALL=true
@@ -28,7 +32,10 @@ fi
 
 ## Mount EBS tmp
 # Make file system if necessary (only when the volume is new)
+echo "file -s /dev/xvdi" >> /var/log/userData.log
 OUTPUT="$(file -s /dev/xvdi)"
+echo $OUTPUT >> /var/log/userData.log
+
 if [[ $OUTPUT == *"/dev/xvdi: data"* ]]; then
   mkfs -t xfs /dev/xvdi
   echo "Temp file system created" >> /var/log/userData.log
@@ -80,6 +87,7 @@ systemctl restart apparmor
 # Recreate default dir to trick mysql into starting
 sudo mkdir /var/lib/mysql/mysql -p
 # Mysql perf optimisations
+echo "[server]" >> /etc/mysql/conf.d/mysql.cnf
 echo "innodb_buffer_pool_size=768M" >> /etc/mysql/conf.d/mysql.cnf
 echo "innodb_io_capacity=4000" >> /etc/mysql/conf.d/mysql.cnf
 # Start mysql
@@ -97,10 +105,13 @@ systemctl stop apache2
 ## MYSQL
 # Todo: mysql_secure_installation
 if [ "$NEWINSTALL" == true ]; then
+  echo "Creating DB: 'nextcloud'@'localhost' IDENTIFIED BY '<MYSQL_NEXTCLOUD_PASSWORD>'" >> /var/log/userData.log
   mysql --user="root" --execute="CREATE DATABASE nextcloud;
                                 CREATE USER 'nextcloud'@'localhost' IDENTIFIED BY '<MYSQL_NEXTCLOUD_PASSWORD>';
                                 GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'localhost';
                                 FLUSH PRIVILEGES;"
+else
+  echo "Not a new install, DB not created" >> /var/log/userData.log
 fi
 
 
@@ -166,4 +177,4 @@ chown -R www-data:www-data /var/www/html/nextcloud/config/storage.config.php
 
 # Start Apache once conf done
 systemctl start apache2
-echo "Script execution complete..." >> /var/log/userData.log
+echo "Script execution complete!" >> /var/log/userData.log

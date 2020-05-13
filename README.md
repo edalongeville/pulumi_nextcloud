@@ -55,21 +55,33 @@ Logged in as admin, go to Apps (top right corner),  Active Apps, and disable "Ph
 
 First, create a DNS A record pointing to your elasticIP. For instance, for cloud.mydomain.com, we create:
 
-```cloud IN A <YOUR_ELASTIC_IP>```
+    cloud IN A <YOUR_ELASTIC_IP>
 
 Then, access your server via ssh (the keyPair you created before running the tool will be required):
 
-```ssh ubuntu@<YOUR_ELASTIC_IP> -i <YOUR_KEYPAIR_FILE_NAME>.pem```
+    ssh ubuntu@<YOUR_ELASTIC_IP> -i <YOUR_KEYPAIR_FILE_NAME>.pem
 
 Once on the server, run Certbot:
 
-```sudo certbot --apache```
+    sudo certbot --apache
 
 Provide your email, your domain (cloud.mydomain.fr) and chose Redirect. Certbot will take care of everything.
 
+Open Apache config file:
+
+    vim /var/www/html/nextcloud/config/config.php
+
+Ensure the trusted_domains array contains your domain, and not an IP (replace if needed):
+
+    'trusted_domains' =>
+      array (
+        0 => 'cloud.mydomain.fr',
+      ),
+
+
 Backup the certs:
 
-`zip -r /mnt/ebs/letsencrypt.zip /etc/letsencrypt`
+    zip -r /mnt/ebs/letsencrypt.zip /etc/letsencrypt
 
 ## Troubleshooting
 ### My Nextcloud DB reached the max size!
@@ -84,5 +96,5 @@ Because your data is protected, you need to take some actions before destroying 
 - Backup all your data
 - Empty the S3 bucket (from AWS Management console)
 - Type `pulumi destroy`. You'll get an error message with a resource URN at the end.
-- Type `pulumi state unprotect URN_FROM_PREVIOUS_STEP`
+- Type `pulumi state unprotect URN_FROM_PREVIOUS_STEP -y`
 - Type `pulumi destroy`
