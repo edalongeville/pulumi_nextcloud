@@ -1,0 +1,15 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      # pulumi
+      - curl -fsSL https://get.pulumi.com/ | sh
+      - export PATH=$PATH:$HOME/.pulumi/bin
+  build:
+    commands:
+      - python3 -m venv venv
+      - . venv/bin/activate
+      - pip3 install autopep8 wheel -r requirements.txt
+      - pulumi stack select prod
+      - pulumi preview
