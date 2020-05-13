@@ -83,6 +83,15 @@ Backup the certs:
 
     zip -r /mnt/ebs/letsencrypt.zip /etc/letsencrypt
 
+### Enable HTTP Strict Transport Security
+In /etc/apache2/sites-available/000-default-le-ssl.conf, add the IfModule section after `ServerName cloud.mydomain.fr`:
+
+    <IfModule mod_headers.c>
+            Header always set Strict-Transport-Security "max-age=15552000; includeSubDomains"
+    </IfModule>
+
+Restart apache with `systemctl restart apache2`.
+
 ## Troubleshooting
 ### My Nextcloud DB reached the max size!
 The nextcloud Data and DB are stored on an EBS Volume. If your database reached the maximum size:
